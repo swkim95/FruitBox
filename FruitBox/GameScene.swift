@@ -146,11 +146,137 @@ class GameScene: SKScene {
         // Initialize the board array with the correct dimensions
         board = Array(repeating: Array(repeating: nil, count: boardWidth), count: boardHeight)
         
-        // Create cells for the board
+        // Generate a balanced pool of numbers
+        let numberPool = generateBalancedNumberPool()
+        
+        // First, identify positions for high and low numbers
+        var highNumberPositions: [(row: Int, col: Int)] = []
+        var lowNumberPositions: [(row: Int, col: Int)] = []
+        var otherPositions: [(row: Int, col: Int)] = []
+        
+        // Create a list of all positions
+        var allPositions: [(row: Int, col: Int)] = []
         for row in 0..<boardHeight {
             for col in 0..<boardWidth {
-                // Create a cell with a random value (1-9)
-                let value = Int.random(in: 1...9)
+                allPositions.append((row, col))
+            }
+        }
+        
+        // Shuffle positions
+        allPositions.shuffle()
+        
+        // Find high numbers in the pool
+        let highNumbers = numberPool.filter { $0 >= 8 } // Changed to 8 and 9 only
+        let lowNumbers = numberPool.filter { $0 <= 3 }
+        let mediumNumbers = numberPool.filter { $0 > 3 && $0 < 8 } // 4-7
+        
+        // Place high numbers (8 and 9) with spacing between them
+        var placedHighNumbers: [(row: Int, col: Int)] = []
+        
+        for _ in 0..<highNumbers.count {
+            if allPositions.isEmpty { break }
+            
+            // Find a valid position for this high number
+            var validPositionFound = false
+            var positionIndex = 0
+            
+            while positionIndex < allPositions.count && !validPositionFound {
+                let position = allPositions[positionIndex]
+                
+                // Check if this position is adjacent to any already placed high number
+                let isAdjacent = placedHighNumbers.contains { placedPos in
+                    let rowDiff = abs(placedPos.row - position.row)
+                    let colDiff = abs(placedPos.col - position.col)
+                    
+                    // Check if directly adjacent (horizontally, vertically, or diagonally)
+                    return rowDiff <= 1 && colDiff <= 1
+                }
+                
+                if !isAdjacent {
+                    // This position is not adjacent to any high number, so it's valid
+                    placedHighNumbers.append(position)
+                    highNumberPositions.append(position)
+                    allPositions.remove(at: positionIndex)
+                    validPositionFound = true
+                } else {
+                    // Try the next position
+                    positionIndex += 1
+                }
+            }
+            
+            // If we couldn't find a valid position, just use the first available one
+            if !validPositionFound && !allPositions.isEmpty {
+                let position = allPositions.removeFirst()
+                placedHighNumbers.append(position)
+                highNumberPositions.append(position)
+            }
+        }
+        
+        // For each high number position, find a nearby position for a low number
+        for highPos in highNumberPositions {
+            if allPositions.isEmpty || lowNumberPositions.count >= lowNumbers.count { break }
+            
+            // Find nearby positions (within 2 cells but not directly adjacent)
+            var nearbyIndices: [Int] = []
+            
+            for (index, pos) in allPositions.enumerated() {
+                let rowDiff = abs(pos.row - highPos.row)
+                let colDiff = abs(pos.col - highPos.col)
+                
+                // Check if this position is within 2 cells of the high number
+                // but not directly adjacent (to avoid clustering)
+                if (rowDiff == 2 || colDiff == 2) || (rowDiff == 1 && colDiff == 1) {
+                    nearbyIndices.append(index)
+                }
+            }
+            
+            // If we found nearby positions, use one for a low number
+            if let randomIndex = nearbyIndices.randomElement() {
+                lowNumberPositions.append(allPositions.remove(at: randomIndex))
+            }
+        }
+        
+        // Assign remaining positions for low numbers
+        while !allPositions.isEmpty && lowNumberPositions.count < lowNumbers.count {
+            lowNumberPositions.append(allPositions.removeFirst())
+        }
+        
+        // Assign remaining positions for medium numbers
+        var mediumNumberPositions: [(row: Int, col: Int)] = []
+        while !allPositions.isEmpty && mediumNumberPositions.count < mediumNumbers.count {
+            mediumNumberPositions.append(allPositions.removeFirst())
+        }
+        
+        // Assign remaining positions for other numbers
+        otherPositions = allPositions
+        
+        // Now create cells with the appropriate values
+        var highNumberIndex = 0
+        var lowNumberIndex = 0
+        var mediumNumberIndex = 0
+        var otherNumberIndex = 0
+        
+        for row in 0..<boardHeight {
+            for col in 0..<boardWidth {
+                // Determine the value for this position
+                var value = 1 // Default
+                
+                if highNumberIndex < highNumbers.count && highNumberPositions.contains(where: { $0.row == row && $0.col == col }) {
+                    value = highNumbers[highNumberIndex]
+                    highNumberIndex += 1
+                } else if lowNumberIndex < lowNumbers.count && lowNumberPositions.contains(where: { $0.row == row && $0.col == col }) {
+                    value = lowNumbers[lowNumberIndex]
+                    lowNumberIndex += 1
+                } else if mediumNumberIndex < mediumNumbers.count && mediumNumberPositions.contains(where: { $0.row == row && $0.col == col }) {
+                    value = mediumNumbers[mediumNumberIndex]
+                    mediumNumberIndex += 1
+                } else if otherNumberIndex < numberPool.count - highNumberIndex - lowNumberIndex - mediumNumberIndex {
+                    // Use any remaining numbers
+                    value = numberPool[highNumberIndex + lowNumberIndex + mediumNumberIndex + otherNumberIndex]
+                    otherNumberIndex += 1
+                }
+                
+                // Create the cell with the determined value
                 let cell = FruitCell(value: value)
                 
                 // Position the cell on the board
@@ -175,71 +301,90 @@ class GameScene: SKScene {
         }
     }
     
-    // Generate a balanced pool of numbers that favors lower numbers to make the game easier
+    // Completely revised generateBalancedNumberPool method
     private func generateBalancedNumberPool() -> [Int] {
         let totalCells = boardWidth * boardHeight
         var numberPool: [Int] = []
         
-        // Create pairs that sum to 10, but favor lower numbers
-        let pairsNeeded = totalCells / 2
-        
         // Define weights for each number (higher weight = more frequent)
         let weights: [Int: Int] = [
-            1: 20,  // Most common
-            2: 18,
-            3: 16,
-            4: 14,
-            5: 12,  // 5 is special since it pairs with itself
-            6: 10,
-            7: 8,
-            8: 6,
-            9: 4    // Least common
+            1: 28,  // Most common
+            2: 28,
+            3: 26,
+            4: 22,
+            5: 18,
+            6: 14,
+            7: 10,
+            8: 8,
+            9: 6    // Least common
         ]
         
-        // Calculate total weight
-        let totalWeight = weights.values.reduce(0, +)
-        
-        for _ in 0..<pairsNeeded {
-            // Select a number based on weights
-            var randomWeight = Int.random(in: 1...totalWeight)
-            var selectedNumber = 1
-            
-            for (number, weight) in weights {
-                randomWeight -= weight
-                if randomWeight <= 0 {
-                    selectedNumber = number
-                    break
-                }
+        // Create a weighted pool where each number appears according to its weight
+        var weightedPool: [Int] = []
+        for (number, weight) in weights {
+            for _ in 0..<weight {
+                weightedPool.append(number)
             }
-            
-            // Add the selected number and its complement
-            let complement = 10 - selectedNumber
-            
-            numberPool.append(selectedNumber)
-            numberPool.append(complement)
         }
         
-        // If we have an odd number of cells, add one more random number
-        // Favor lower numbers for the extra cell too
-        if totalCells % 2 != 0 {
-            var randomWeight = Int.random(in: 1...totalWeight)
-            var selectedNumber = 1
-            
-            for (number, weight) in weights {
-                randomWeight -= weight
-                if randomWeight <= 0 {
-                    selectedNumber = number
-                    break
-                }
-            }
-            
-            numberPool.append(selectedNumber)
+        // Shuffle the weighted pool
+        weightedPool.shuffle()
+        
+        // Fill the number pool by drawing from the weighted pool
+        // Keep drawing until we have enough numbers
+        while numberPool.count < totalCells && !weightedPool.isEmpty {
+            numberPool.append(weightedPool.removeFirst())
         }
         
-        // Shuffle the pool to randomize positions
-        numberPool.shuffle()
+        // If we run out of numbers in the weighted pool, just repeat the process
+        while numberPool.count < totalCells {
+            // Recreate and reshuffle the weighted pool
+            weightedPool = []
+            for (number, weight) in weights {
+                for _ in 0..<weight {
+                    weightedPool.append(number)
+                }
+            }
+            weightedPool.shuffle()
+            
+            // Draw more numbers
+            while numberPool.count < totalCells && !weightedPool.isEmpty {
+                numberPool.append(weightedPool.removeFirst())
+            }
+        }
         
-        return numberPool
+        // Now ensure the sum is a multiple of 10 (for game solvability)
+        let sum = numberPool.reduce(0, +)
+        let remainder = sum % 10
+        
+        if remainder != 0 {
+            // Find a number to replace to make the sum a multiple of 10
+            let needed = 10 - remainder
+            
+            // Try to find a number that, when replaced with (number + needed),
+            // would make the sum a multiple of 10
+            for i in 0..<numberPool.count {
+                let current = numberPool[i]
+                let replacement = (current + needed) % 10
+                if replacement == 0 {
+                    numberPool[i] = 10  // Special case
+                } else {
+                    numberPool[i] = replacement
+                }
+                
+                // Check if we've fixed the sum
+                let newSum = numberPool.reduce(0, +)
+                if newSum % 10 == 0 {
+                    break
+                } else {
+                    // Revert the change and try the next number
+                    numberPool[i] = current
+                }
+            }
+        }
+        
+        // Shuffle the final pool
+        return numberPool.shuffled()
     }
     
     private func setupMenuButton() {
@@ -524,8 +669,8 @@ class GameScene: SKScene {
             // Update score display
             scoreLabel.text = "Score: \(score)"
             
-            // Check if game is over (no more possible combinations)
-            checkGameState()
+            // // Check if game is over (no more possible combinations)
+            // checkGameState()
             
             // Check if any of the selected cells are bonus cells
             for cell in selectedCells {
@@ -624,7 +769,7 @@ class GameScene: SKScene {
         let gameOverLabel = SKLabelNode(fontNamed: "Futura-Bold")
         gameOverLabel.text = "Game Over!"
         gameOverLabel.fontSize = 48
-        gameOverLabel.fontColor = SKColor.red
+        gameOverLabel.fontColor = SKColor.white
         gameOverLabel.position = CGPoint(x: size.width/2, y: size.height/2 + 50)
         gameOverLabel.zPosition = 11
         addChild(gameOverLabel)
