@@ -8,6 +8,9 @@ class FruitCell: SKSpriteNode {
     // Add this static property to the FruitCell class
     private static var cachedCatImage: UIImage?
     
+    // Add this property to the FruitCell class
+    var isTimeBonus: Bool = false
+    
     init(value: Int) {
         self.value = value
         

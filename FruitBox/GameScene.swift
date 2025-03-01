@@ -43,6 +43,10 @@ class GameScene: SKScene {
     private var gamePaused = false
     private var menuButton: SKShapeNode!
     
+    // Bonus properties
+    private var bonusCells: [FruitCell] = []
+    private var bonusCatSize: CGSize = CGSize(width: 50, height: 50)
+    
     override func didMove(to view: SKView) {
         // Set a nicer background color that complements red
         backgroundColor = OptionsScene.backgroundColor
@@ -84,6 +88,9 @@ class GameScene: SKScene {
         
         // Create the game board
         createBoard()
+        
+        // Mark random cells as bonus cells
+        setupBonusCells()
         
         // Create score label
         scoreLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
@@ -395,50 +402,46 @@ class GameScene: SKScene {
     }
     
     override func update(_ currentTime: TimeInterval) {
-        // Skip updates when paused
-        if gamePaused { return }
-        
-        // First frame, just set the last update time
-        if lastUpdateTime == 0 {
+        // Only update if the game is active and not paused
+        if isGameActive && !gamePaused {
+            // Calculate delta time
+            if lastUpdateTime == 0 {
+                lastUpdateTime = currentTime
+            }
+            let dt = currentTime - lastUpdateTime
             lastUpdateTime = currentTime
-            return
-        }
-        
-        // Calculate delta time
-        let dt = currentTime - lastUpdateTime
-        lastUpdateTime = currentTime
-        
-        // Only update timer if game is active
-        if isGameActive {
+            
             // Update time remaining
             timeRemaining -= dt
             
-            // Update timer display
+            // Update the timer display
             updateTimerDisplay()
             
-            // Check if time's up
+            // Check if time is up
             if timeRemaining <= 0 {
-                endGameDueToTimeUp()
+                gameOver()
             }
         }
     }
     
     private func updateTimerDisplay() {
-        // Update timer bar width
-        let percentage = CGFloat(timeRemaining / gameTime)
-        let newWidth = timerBarWidth * percentage
-        timerBar.path = CGPath(roundedRect: CGRect(x: -newWidth/2, y: -10, width: newWidth, height: 20), cornerWidth: 5, cornerHeight: 5, transform: nil)
+        // Update the timer bar width
+        let progress = timeRemaining / gameTime
+        let newWidth = timerBarWidth * CGFloat(progress)
+        timerBar.xScale = CGFloat(progress)
         
-        // Update timer label
+        // Update the timer label
         let minutes = Int(timeRemaining) / 60
         let seconds = Int(timeRemaining) % 60
         timerLabel.text = String(format: "%d:%02d", minutes, seconds)
         
-        // Change color as time gets low
-        if timeRemaining < 10 {
+        // Change color based on time remaining
+        if timeRemaining < 30 {
             timerBar.fillColor = SKColor.red.withAlphaComponent(0.7)
-        } else if timeRemaining < 30 {
-            timerBar.fillColor = SKColor.orange.withAlphaComponent(0.7)
+        } else if timeRemaining < 60 {
+            timerBar.fillColor = SKColor.yellow.withAlphaComponent(0.7)
+        } else {
+            timerBar.fillColor = SKColor(red: 0.1, green: 0.8, blue: 0.3, alpha: 0.7) // Green
         }
     }
     
@@ -523,6 +526,19 @@ class GameScene: SKScene {
             
             // Check if game is over (no more possible combinations)
             checkGameState()
+            
+            // Check if any of the selected cells are bonus cells
+            for cell in selectedCells {
+                if cell.isTimeBonus {
+                    // Create a bonus cat at the cell's position
+                    createBonusCat(at: cell.position)
+                    
+                    // Remove from the bonus cells array
+                    if let index = bonusCells.firstIndex(of: cell) {
+                        bonusCells.remove(at: index)
+                    }
+                }
+            }
         } else {
             // Invalid selection - unhighlight cells
             for cell in selectedCells {
@@ -876,5 +892,61 @@ class GameScene: SKScene {
         // Remove the pause menu
         pauseMenu?.removeFromParent()
         pauseMenu = nil
+    }
+    
+    // Add this method to mark random cells as bonus cells
+    private func setupBonusCells() {
+        // Get all cells in a flat array
+        var allCells: [FruitCell] = []
+        for row in board {
+            for cell in row {
+                if let cell = cell {
+                    allCells.append(cell)
+                }
+            }
+        }
+        
+        // Shuffle the array and pick the first 10 cells (or fewer if there aren't enough cells)
+        allCells.shuffle()
+        let bonusCount = min(10, allCells.count)
+        
+        for i in 0..<bonusCount {
+            allCells[i].isTimeBonus = true
+            bonusCells.append(allCells[i])
+        }
+        
+        // Set the bonus cat size based on cell size
+        bonusCatSize = CGSize(width: cellSize * 0.9, height: cellSize * 0.9)
+    }
+    
+    // Add this method to create a bonus cat
+    private func createBonusCat(at position: CGPoint) {
+        let bonusCat = BonusCat(at: position, size: bonusCatSize)
+        
+        // Set the callback for when the bonus is collected
+        bonusCat.onCollect = { [weak self] in
+            self?.addTimeBonus()
+        }
+        
+        addChild(bonusCat)
+    }
+    
+    // Add this method to add time to the timer
+    private func addTimeBonus() {
+        // Add 10 seconds to the timer
+        timeRemaining += BonusCat.bonusTime
+        
+        // Make sure we don't exceed the original game time
+        timeRemaining = min(timeRemaining, gameTime)
+        
+        // Update the timer display
+        updateTimerDisplay()
+        
+        // Play a sound or visual effect to indicate the bonus
+        let flash = SKAction.sequence([
+            SKAction.colorize(with: .green, colorBlendFactor: 0.3, duration: 0.2),
+            SKAction.colorize(with: .clear, colorBlendFactor: 0.0, duration: 0.2)
+        ])
+        timerBar.run(flash)
     }
 } 

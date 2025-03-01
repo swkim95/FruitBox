@@ -20,6 +20,7 @@
 		3CB554E32D732A860062DB8F /* OptionsScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB554E12D732A850062DB8F /* OptionsScene.swift */; };
 		3CB554E42D732A860062DB8F /* PauseMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB554E22D732A860062DB8F /* PauseMenu.swift */; };
 		3CB554E82D7352980062DB8F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CB554E72D7352980062DB8F /* Assets.xcassets */; };
+		3CB554EA2D735E1B0062DB8F /* BonusCat.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB554E92D735E1B0062DB8F /* BonusCat.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +38,7 @@
 		3CB554E12D732A850062DB8F /* OptionsScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionsScene.swift; sourceTree = "<group>"; };
 		3CB554E22D732A860062DB8F /* PauseMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PauseMenu.swift; sourceTree = "<group>"; };
 		3CB554E72D7352980062DB8F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		3CB554E92D735E1B0062DB8F /* BonusCat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BonusCat.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +72,7 @@
 		3CB554AF2D73002E0062DB8F /* FruitBox */ = {
 			isa = PBXGroup;
 			children = (
+				3CB554E92D735E1B0062DB8F /* BonusCat.swift */,
 				3CB554E12D732A850062DB8F /* OptionsScene.swift */,
 				3CB554E22D732A860062DB8F /* PauseMenu.swift */,
 				3CB554DD2D730C1B0062DB8F /* Main.storyboard */,
@@ -168,6 +171,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3CB554CA2D7301440062DB8F /* FruitCell.swift in Sources */,
+				3CB554EA2D735E1B0062DB8F /* BonusCat.swift in Sources */,
 				3CB554E32D732A860062DB8F /* OptionsScene.swift in Sources */,
 				3CB554B72D73002E0062DB8F /* GameScene.swift in Sources */,
 				3CB554B92D73002E0062DB8F /* GameViewController.swift in Sources */,
