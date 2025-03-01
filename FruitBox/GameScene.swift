@@ -45,6 +45,7 @@ class GameScene: SKScene {
         setupGame()
         setupTimerBar()
         setupBackButton()
+        setupHintButton()
     }
     
     private func setupGame() {
@@ -86,6 +87,9 @@ class GameScene: SKScene {
         scoreLabel.fontColor = SKColor(red: 0.1, green: 0.6, blue: 0.3, alpha: 0.8) // Darker blue
         scoreLabel.position = CGPoint(x: size.width/2, y: size.height - 120)
         addChild(scoreLabel)
+        
+        // Add hint button
+        setupHintButton()
     }
     
     private func setupTimerBar() {
@@ -121,10 +125,14 @@ class GameScene: SKScene {
         // Initialize the board array with optionals
         board = Array(repeating: Array(repeating: nil, count: boardWidth), count: boardHeight)
         
-        // Create cells with random values (1-9)
+        // Create a pool of numbers that ensures valid combinations
+        var numberPool = generateBalancedNumberPool()
+        
+        // Create cells with values from the balanced pool
         for row in 0..<boardHeight {
             for col in 0..<boardWidth {
-                let value = Int.random(in: 1...9)
+                // Get a value from the pool
+                let value = numberPool.removeFirst()
                 let cell = FruitCell(value: value)
                 
                 // Position the cell with minimal spacing
@@ -140,6 +148,73 @@ class GameScene: SKScene {
                 board[row][col] = cell
             }
         }
+    }
+    
+    // Generate a balanced pool of numbers that favors lower numbers to make the game easier
+    private func generateBalancedNumberPool() -> [Int] {
+        let totalCells = boardWidth * boardHeight
+        var numberPool: [Int] = []
+        
+        // Create pairs that sum to 10, but favor lower numbers
+        let pairsNeeded = totalCells / 2
+        
+        // Define weights for each number (higher weight = more frequent)
+        let weights: [Int: Int] = [
+            1: 20,  // Most common
+            2: 18,
+            3: 16,
+            4: 14,
+            5: 12,  // 5 is special since it pairs with itself
+            6: 10,
+            7: 8,
+            8: 6,
+            9: 4    // Least common
+        ]
+        
+        // Calculate total weight
+        let totalWeight = weights.values.reduce(0, +)
+        
+        for _ in 0..<pairsNeeded {
+            // Select a number based on weights
+            var randomWeight = Int.random(in: 1...totalWeight)
+            var selectedNumber = 1
+            
+            for (number, weight) in weights {
+                randomWeight -= weight
+                if randomWeight <= 0 {
+                    selectedNumber = number
+                    break
+                }
+            }
+            
+            // Add the selected number and its complement
+            let complement = 10 - selectedNumber
+            
+            numberPool.append(selectedNumber)
+            numberPool.append(complement)
+        }
+        
+        // If we have an odd number of cells, add one more random number
+        // Favor lower numbers for the extra cell too
+        if totalCells % 2 != 0 {
+            var randomWeight = Int.random(in: 1...totalWeight)
+            var selectedNumber = 1
+            
+            for (number, weight) in weights {
+                randomWeight -= weight
+                if randomWeight <= 0 {
+                    selectedNumber = number
+                    break
+                }
+            }
+            
+            numberPool.append(selectedNumber)
+        }
+        
+        // Shuffle the pool to randomize positions
+        numberPool.shuffle()
+        
+        return numberPool
     }
     
     private func setupBackButton() {
@@ -160,6 +235,26 @@ class GameScene: SKScene {
         backButton.addChild(backLabel)
         
         addChild(backButton)
+    }
+    
+    // Add a hint button to the game
+    private func setupHintButton() {
+        let hintButton = SKShapeNode(rectOf: CGSize(width: 80, height: 40), cornerRadius: 10)
+        hintButton.fillColor = SKColor(red: 0.3, green: 0.6, blue: 0.3, alpha: 0.7)
+        hintButton.strokeColor = SKColor.black
+        hintButton.lineWidth = 1
+        hintButton.position = CGPoint(x: size.width - 60, y: size.height - 40)
+        hintButton.name = "hintButton"
+        
+        let hintLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        hintLabel.text = "Hint"
+        hintLabel.fontSize = 18
+        hintLabel.fontColor = SKColor.white
+        hintLabel.verticalAlignmentMode = .center
+        hintLabel.horizontalAlignmentMode = .center
+        hintButton.addChild(hintLabel)
+        
+        addChild(hintButton)
     }
     
     // MARK: - Touch Handling
@@ -185,6 +280,10 @@ class GameScene: SKScene {
                 
                 let transition = SKTransition.fade(withDuration: 0.5)
                 self.view?.presentScene(newGameScene, transition: transition)
+                return
+            } else if node.name == "hintButton" {
+                // Show a hint
+                showHint()
                 return
             }
         }
@@ -363,7 +462,7 @@ class GameScene: SKScene {
         // Calculate sum of selected cells
         let sum = selectedCells.reduce(0) { $0 + $1.value }
         
-        if sum == 10 {
+        if sum == 10 {  // Check for exactly 10, not a multiple of 10
             // Valid selection - remove cells and update score
             for cell in selectedCells {
                 score += cell.value
@@ -393,9 +492,6 @@ class GameScene: SKScene {
     }
     
     private func checkGameState() {
-        // Check if there are any possible combinations left
-        var possibleCombinations = false
-        
         // Get all remaining cells
         var remainingCells: [FruitCell] = []
         for row in board {
@@ -406,28 +502,50 @@ class GameScene: SKScene {
             }
         }
         
-        // Check all possible combinations
-        for i in 0..<remainingCells.count {
-            for j in (i+1)..<remainingCells.count {
-                let sum = remainingCells[i].value + remainingCells[j].value
-                if sum == 10 {
+        // If no cells left, game is won
+        if remainingCells.isEmpty {
+            gameWon()
+            return
+        }
+        
+        // First, check if there are any possible combinations left
+        var possibleCombinations = false
+        
+        // Create a frequency map of values
+        var valueFrequency: [Int: Int] = [:]
+        for cell in remainingCells {
+            valueFrequency[cell.value, default: 0] += 1
+        }
+        
+        // Check for pairs that sum to 10
+        for value in 1...9 {
+            let complement = 10 - value
+            
+            if value == complement { // For value 5
+                if valueFrequency[value, default: 0] >= 2 {
+                    possibleCombinations = true
+                    break
+                }
+            } else {
+                if valueFrequency[value, default: 0] > 0 && valueFrequency[complement, default: 0] > 0 {
                     possibleCombinations = true
                     break
                 }
             }
-            if possibleCombinations {
-                break
-            }
         }
         
-        // If no combinations are possible and there are cells left, game is over
-        if !possibleCombinations && !remainingCells.isEmpty {
+        // If no combinations are possible, game is over
+        if !possibleCombinations {
             gameOver()
+            return
         }
         
-        // If no cells left, game is won
-        if remainingCells.isEmpty {
-            gameWon()
+        // If there are possible combinations, check if they can be selected with rectangles
+        let fullySolvable = isFullySolvable()
+        
+        if !fullySolvable {
+            // If the board is not fully solvable, end the game
+            gameOver()
         }
     }
     
@@ -566,5 +684,105 @@ class GameScene: SKScene {
             }
         }
         return nil
+    }
+    
+    // Check if the board is solvable considering rectangular selection constraint
+    private func isFullySolvable() -> Bool {
+        // Get all remaining cells with their positions
+        var cellsWithPositions: [(cell: FruitCell, row: Int, col: Int)] = []
+        
+        for row in 0..<board.count {
+            for col in 0..<board[row].count {
+                if let cell = board[row][col] {
+                    cellsWithPositions.append((cell, row, col))
+                }
+            }
+        }
+        
+        // If no cells left, the board is solved
+        if cellsWithPositions.isEmpty {
+            return true
+        }
+        
+        // Check for all possible rectangular selections
+        for i in 0..<cellsWithPositions.count {
+            for j in (i+1)..<cellsWithPositions.count {
+                let cell1 = cellsWithPositions[i]
+                let cell2 = cellsWithPositions[j]
+                
+                // Check if the sum is 10
+                if cell1.cell.value + cell2.cell.value == 10 {
+                    // Check if they can be selected with a rectangle
+                    if canSelectWithRectangle(cell1: (cell1.row, cell1.col), cell2: (cell2.row, cell2.col)) {
+                        return true
+                    }
+                }
+            }
+        }
+        
+        return false
+    }
+    
+    // Check if two cells can be selected with a rectangle
+    private func canSelectWithRectangle(cell1: (row: Int, col: Int), cell2: (row: Int, col: Int)) -> Bool {
+        // Calculate the rectangle that would be formed
+        let minRow = min(cell1.row, cell2.row)
+        let maxRow = max(cell1.row, cell2.row)
+        let minCol = min(cell1.col, cell2.col)
+        let maxCol = max(cell1.col, cell2.col)
+        
+        // Count how many cells with values 10-sum are in the rectangle
+        var targetCellCount = 0
+        var otherCellCount = 0
+        
+        for row in minRow...maxRow {
+            for col in minCol...maxCol {
+                if let cell = board[row][col] {
+                    if (row == cell1.row && col == cell1.col) || (row == cell2.row && col == cell2.col) {
+                        targetCellCount += 1
+                    } else {
+                        otherCellCount += 1
+                    }
+                }
+            }
+        }
+        
+        // If the rectangle contains exactly our two target cells and no others,
+        // then they can be selected with a rectangle
+        return targetCellCount == 2 && otherCellCount == 0
+    }
+    
+    // Show a hint by highlighting a valid pair
+    private func showHint() {
+        // Find a valid pair that can be selected with a rectangle
+        for i in 0..<board.count {
+            for j in 0..<board[i].count {
+                if let cell1 = board[i][j] {
+                    // Look for a matching cell
+                    for k in 0..<board.count {
+                        for l in 0..<board[k].count {
+                            if let cell2 = board[k][l], cell1 !== cell2 {
+                                if cell1.value + cell2.value == 10 && canSelectWithRectangle(cell1: (i, j), cell2: (k, l)) {
+                                    // Highlight these cells temporarily
+                                    cell1.highlight()
+                                    cell2.highlight()
+                                    
+                                    // Unhighlight after a delay
+                                    let unhighlightAction = SKAction.run {
+                                        cell1.unhighlight()
+                                        cell2.unhighlight()
+                                    }
+                                    let delayAction = SKAction.wait(forDuration: 1.0)
+                                    let sequence = SKAction.sequence([delayAction, unhighlightAction])
+                                    self.run(sequence)
+                                    
+                                    return
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 } 
