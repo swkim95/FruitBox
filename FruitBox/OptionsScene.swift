@@ -1120,7 +1120,7 @@ class OptionsScene: SKScene {
         timeSliderKnob.lineWidth = 1
         
         // Calculate initial position based on current time limit
-        let minTime: TimeInterval = 60.0 // 1 minute
+        let minTime: TimeInterval = 30.0 // 0.5 minute
         let maxTime: TimeInterval = 300.0 // 5 minutes
         let sliderWidth = timeSlider.frame.width - 30 // Adjust for knob size
         let normalizedTime = (OptionsScene.timeLimit - minTime) / (maxTime - minTime)
@@ -1197,7 +1197,7 @@ class OptionsScene: SKScene {
         timeSliderKnob.position = CGPoint(x: newX, y: timeSlider.position.y)
         
         // Calculate time value based on slider position
-        let minTime: TimeInterval = 60.0 // 1 minute
+        let minTime: TimeInterval = 30.0 // 1 minute
         let maxTime: TimeInterval = 300.0 // 5 minutes
         let normalizedPosition = (newX - sliderLeft) / sliderWidth
         let newTime = minTime + (maxTime - minTime) * TimeInterval(normalizedPosition)

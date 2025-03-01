@@ -597,7 +597,7 @@ class GameScene: SKScene {
         isGameActive = false
         
         // Create a semi-transparent background panel
-        let panelBackground = SKShapeNode(rectOf: CGSize(width: size.width - 60, height: 300), cornerRadius: 20)
+        let panelBackground = SKShapeNode(rectOf: CGSize(width: size.width - 60, height: 320), cornerRadius: 20)
         panelBackground.fillColor = SKColor.black.withAlphaComponent(0.9)
         panelBackground.strokeColor = SKColor.white.withAlphaComponent(0.3)
         panelBackground.lineWidth = 2
@@ -651,11 +651,13 @@ class GameScene: SKScene {
         let sum = selectedCells.reduce(0) { $0 + $1.value }
         
         if sum == 10 {  // Check for exactly 10, not a multiple of 10
-            // Valid selection - remove cells and update score
+            // Valid selection - calculate new score: 10 + number of cells
+            let cellCount = selectedCells.count
+            let scoreIncrease = 10 + cellCount
+            score += scoreIncrease
+            
+            // Animate removal
             for cell in selectedCells {
-                score += cell.value
-                
-                // Animate removal
                 let scaleAction = SKAction.scale(to: 0, duration: 0.2)
                 let removeAction = SKAction.removeFromParent()
                 cell.run(SKAction.sequence([scaleAction, removeAction]))
@@ -757,7 +759,7 @@ class GameScene: SKScene {
         isGameActive = false
         
         // Create a semi-transparent background panel
-        let panelBackground = SKShapeNode(rectOf: CGSize(width: size.width - 60, height: 240), cornerRadius: 20)
+        let panelBackground = SKShapeNode(rectOf: CGSize(width: size.width - 60, height: 320), cornerRadius: 20)
         panelBackground.fillColor = SKColor.black.withAlphaComponent(0.7)
         panelBackground.strokeColor = SKColor.white.withAlphaComponent(0.3)
         panelBackground.lineWidth = 2
@@ -801,6 +803,20 @@ class GameScene: SKScene {
         restartButton.addChild(restartLabel)
         
         addChild(restartButton)
+        
+        // Save the score and get rank
+        let rank = ScoreManager.shared.saveScore(score: score, boardSize: OptionsScene.boardSize)
+        
+        // If this is a top 10 score, show the rank
+        if let rank = rank {
+            let rankLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+            rankLabel.text = "New High Score! Rank: #\(rank)"
+            rankLabel.fontSize = 22
+            rankLabel.fontColor = SKColor.yellow
+            rankLabel.position = CGPoint(x: size.width/2, y: size.height/2 - 140)
+            rankLabel.zPosition = 11
+            addChild(rankLabel)
+        }
     }
     
     private func gameWon() {
@@ -812,6 +828,9 @@ class GameScene: SKScene {
         // Calculate bonus points based on remaining time
         let timeBonus = Int(timeRemaining * 10)
         let totalScore = score + timeBonus
+        
+        // Save the score and get rank
+        let rank = ScoreManager.shared.saveScore(score: totalScore, boardSize: OptionsScene.boardSize)
         
         // Create a semi-transparent background panel
         let panelBackground = SKShapeNode(rectOf: CGSize(width: size.width - 60, height: 320), cornerRadius: 20)
@@ -855,6 +874,17 @@ class GameScene: SKScene {
         totalLabel.position = CGPoint(x: size.width/2, y: size.height/2 - 30)
         totalLabel.zPosition = 11
         addChild(totalLabel)
+        
+        // If this is a top 10 score, show the rank
+        if let rank = rank {
+            let rankLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+            rankLabel.text = "New High Score! Rank: #\(rank)"
+            rankLabel.fontSize = 22
+            rankLabel.fontColor = SKColor.yellow
+            rankLabel.position = CGPoint(x: size.width/2, y: size.height/2 - 140)
+            rankLabel.zPosition = 11
+            addChild(rankLabel)
+        }
         
         // Add restart button
         let restartButton = SKShapeNode(rectOf: CGSize(width: 160, height: 50), cornerRadius: 10)

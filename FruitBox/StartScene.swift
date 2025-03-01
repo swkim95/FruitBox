@@ -48,7 +48,7 @@ class StartScene: SKScene {
         optionsButton.fillColor = SKColor(red: 0.3, green: 0.3, blue: 0.8, alpha: 0.3)
         optionsButton.strokeColor = SKColor(red: 0.3, green: 0.3, blue: 0.8, alpha: 0.7)
         optionsButton.lineWidth = 3
-        optionsButton.position = CGPoint(x: size.width/2, y: size.height * 0.35)
+        optionsButton.position = CGPoint(x: size.width/2, y: size.height * 0.4)
         optionsButton.name = "optionsButton"
         
         let optionsLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
@@ -60,6 +60,24 @@ class StartScene: SKScene {
         optionsButton.addChild(optionsLabel)
         
         addChild(optionsButton)
+        
+        // Add scoreboard button below options button
+        let scoreboardButton = SKShapeNode(rectOf: CGSize(width: 200, height: 60), cornerRadius: 10)
+        scoreboardButton.fillColor = SKColor(red: 0.6, green: 0.3, blue: 0.8, alpha: 0.3)
+        scoreboardButton.strokeColor = SKColor(red: 0.6, green: 0.3, blue: 0.8, alpha: 0.7)
+        scoreboardButton.lineWidth = 3
+        scoreboardButton.position = CGPoint(x: size.width/2, y: size.height * 0.3) // Position below options button
+        scoreboardButton.name = "scoreboardButton"
+        
+        let scoreboardLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        scoreboardLabel.text = "Scoreboard"
+        scoreboardLabel.fontSize = 24
+        scoreboardLabel.fontColor = SKColor.black
+        scoreboardLabel.verticalAlignmentMode = .center
+        scoreboardLabel.horizontalAlignmentMode = .center
+        scoreboardButton.addChild(scoreboardLabel)
+        
+        addChild(scoreboardButton)
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -84,6 +102,14 @@ class StartScene: SKScene {
                 let transition = SKTransition.fade(withDuration: 0.5)
                 self.view?.presentScene(optionsScene, transition: transition)
                 break
+            } else if node.name == "scoreboardButton" || node.parent?.name == "scoreboardButton" {
+                // Transition to scoreboard scene
+                let scoreboardScene = ScoreboardScene(size: self.size)
+                scoreboardScene.scaleMode = .aspectFill
+                
+                let transition = SKTransition.fade(withDuration: 0.5)
+                self.view?.presentScene(scoreboardScene, transition: transition)
+                return
             }
         }
     }
