@@ -18,6 +18,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.rootViewController = GameViewController()
         window?.makeKeyAndVisible()
         
+        // Load saved settings
+        OptionsScene.loadSavedSettings()
+        
         return true
     }
 

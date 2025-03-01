@@ -19,8 +19,11 @@ class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        if let view = self.view as? SKView {
-            // Create and configure the start scene
+        // Make sure settings are loaded before creating the start scene
+        OptionsScene.loadSavedSettings()
+        
+        if let view = self.view as! SKView? {
+            // Create the start scene
             let scene = StartScene(size: view.bounds.size)
             scene.scaleMode = .aspectFill
             
@@ -29,8 +32,8 @@ class GameViewController: UIViewController {
             
             view.ignoresSiblingOrder = true
             
-            view.showsFPS = false
-            view.showsNodeCount = false
+            view.showsFPS = true
+            view.showsNodeCount = true
         }
     }
 

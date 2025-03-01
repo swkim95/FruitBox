@@ -17,6 +17,9 @@
 		3CB554CE2D7304F30062DB8F /* StartScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB554CD2D7304F30062DB8F /* StartScene.swift */; };
 		3CB554DF2D730C1B0062DB8F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3CB554DD2D730C1B0062DB8F /* Main.storyboard */; };
 		3CB554E02D730C1B0062DB8F /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB554DE2D730C1B0062DB8F /* SceneDelegate.swift */; };
+		3CB554E32D732A860062DB8F /* OptionsScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB554E12D732A850062DB8F /* OptionsScene.swift */; };
+		3CB554E42D732A860062DB8F /* PauseMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB554E22D732A860062DB8F /* PauseMenu.swift */; };
+		3CB554E82D7352980062DB8F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CB554E72D7352980062DB8F /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +34,9 @@
 		3CB554CD2D7304F30062DB8F /* StartScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartScene.swift; sourceTree = "<group>"; };
 		3CB554DD2D730C1B0062DB8F /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		3CB554DE2D730C1B0062DB8F /* SceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		3CB554E12D732A850062DB8F /* OptionsScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OptionsScene.swift; sourceTree = "<group>"; };
+		3CB554E22D732A860062DB8F /* PauseMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PauseMenu.swift; sourceTree = "<group>"; };
+		3CB554E72D7352980062DB8F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -47,6 +53,7 @@
 		3CB554A42D73002E0062DB8F = {
 			isa = PBXGroup;
 			children = (
+				3CB554E72D7352980062DB8F /* Assets.xcassets */,
 				3CB554AF2D73002E0062DB8F /* FruitBox */,
 				3CB554AE2D73002E0062DB8F /* Products */,
 			);
@@ -63,6 +70,8 @@
 		3CB554AF2D73002E0062DB8F /* FruitBox */ = {
 			isa = PBXGroup;
 			children = (
+				3CB554E12D732A850062DB8F /* OptionsScene.swift */,
+				3CB554E22D732A860062DB8F /* PauseMenu.swift */,
 				3CB554DD2D730C1B0062DB8F /* Main.storyboard */,
 				3CB554DE2D730C1B0062DB8F /* SceneDelegate.swift */,
 				3CB554DC2D730B470062DB8F /* Base.lproj */,
@@ -147,6 +156,7 @@
 				3CB554CC2D7302680062DB8F /* FruitBoxInfo.plist in Resources */,
 				3CB554B52D73002E0062DB8F /* Actions.sks in Resources */,
 				3CB554DF2D730C1B0062DB8F /* Main.storyboard in Resources */,
+				3CB554E82D7352980062DB8F /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -158,9 +168,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				3CB554CA2D7301440062DB8F /* FruitCell.swift in Sources */,
+				3CB554E32D732A860062DB8F /* OptionsScene.swift in Sources */,
 				3CB554B72D73002E0062DB8F /* GameScene.swift in Sources */,
 				3CB554B92D73002E0062DB8F /* GameViewController.swift in Sources */,
 				3CB554CE2D7304F30062DB8F /* StartScene.swift in Sources */,
+				3CB554E42D732A860062DB8F /* PauseMenu.swift in Sources */,
 				3CB554B12D73002E0062DB8F /* AppDelegate.swift in Sources */,
 				3CB554E02D730C1B0062DB8F /* SceneDelegate.swift in Sources */,
 			);
@@ -293,11 +305,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L7A34HWAF4;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = FruitBox;
+				INFOPLIST_KEY_CFBundleDisplayName = RugaBox;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.puzzle-games";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
@@ -323,11 +336,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L7A34HWAF4;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = FruitBox;
+				INFOPLIST_KEY_CFBundleDisplayName = RugaBox;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.puzzle-games";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;

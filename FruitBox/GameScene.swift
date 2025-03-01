@@ -38,13 +38,18 @@ class GameScene: SKScene {
     private var timerLabel: SKLabelNode!
     private var isGameActive = true
     
+    // Pause menu properties
+    private var pauseMenu: PauseMenu?
+    private var gamePaused = false
+    private var menuButton: SKShapeNode!
+    
     override func didMove(to view: SKView) {
         // Set a nicer background color that complements red
-        backgroundColor = SKColor(red: 0.7, green: 0.95, blue: 0.7, alpha: 0.8) // Light blue-ish background
+        backgroundColor = OptionsScene.backgroundColor
         
         setupGame()
         setupTimerBar()
-        setupBackButton()
+        setupMenuButton()
         setupHintButton()
     }
     
@@ -55,36 +60,36 @@ class GameScene: SKScene {
         let availableHeight = size.height - safeAreaTop - safeAreaBottom
         let availableWidth = size.width - 40 // 20 points padding on each side
         
-        // Calculate cell size based on available space
-        // Account for spacing between cells
-        let totalHorizontalSpacing = cellSpacing * CGFloat(boardWidth - 1)
-        let totalVerticalSpacing = cellSpacing * CGFloat(boardHeight - 1)
+        // Get board dimensions from options
+        boardWidth = OptionsScene.boardSize.dimensions.width
+        boardHeight = OptionsScene.boardSize.dimensions.height
         
-        let maxCellWidth = (availableWidth - totalHorizontalSpacing) / CGFloat(boardWidth)
-        let maxCellHeight = (availableHeight - totalVerticalSpacing) / CGFloat(boardHeight)
+        // Calculate cell size based on available space and board dimensions
+        // Use the same calculation for all board sizes to maintain consistent total board size
+        let maxBoardWidth = 9 // Maximum board width (large size)
+        let maxBoardHeight = 18 // Maximum board height (large size)
         
-        // Use the smaller dimension to ensure cells fit
-        cellSize = min(maxCellWidth, maxCellHeight)
+        // Calculate cell size based on the maximum board dimensions
+        let cellWidthByWidth = availableWidth / CGFloat(maxBoardWidth)
+        let cellHeightByHeight = availableHeight / CGFloat(maxBoardHeight)
+        cellSize = min(cellWidthByWidth, cellHeightByHeight)
         
-        // Calculate board dimensions
-        let totalBoardWidth = (cellSize * CGFloat(boardWidth)) + (cellSpacing * CGFloat(boardWidth - 1))
-        let totalBoardHeight = (cellSize * CGFloat(boardHeight)) + (cellSpacing * CGFloat(boardHeight - 1))
+        // Calculate the total board size
+        let totalBoardWidth = cellSize * CGFloat(boardWidth) + cellSpacing * CGFloat(boardWidth - 1)
+        let totalBoardHeight = cellSize * CGFloat(boardHeight) + cellSpacing * CGFloat(boardHeight - 1)
         
-        // Center the board horizontally
+        // Calculate the origin to center the board
         boardOriginX = (size.width - totalBoardWidth) / 2
-        
-        // Position board in the middle of the screen, slightly lower
-        let middleY = size.height / 2
-        boardOriginY = middleY - (totalBoardHeight / 2) - 30 // Shift down by 30 points
+        boardOriginY = safeAreaBottom + (availableHeight - totalBoardHeight) / 2
         
         // Create the game board
         createBoard()
         
-        // Setup score display with fancy font
+        // Create score label
         scoreLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
         scoreLabel.text = "Score: 0"
-        scoreLabel.fontSize = 28
-        scoreLabel.fontColor = SKColor(red: 0.1, green: 0.6, blue: 0.3, alpha: 0.8) // Darker blue
+        scoreLabel.fontSize = 24
+        scoreLabel.fontColor = SKColor.black
         scoreLabel.position = CGPoint(x: size.width/2, y: size.height - 120)
         addChild(scoreLabel)
         
@@ -93,6 +98,10 @@ class GameScene: SKScene {
     }
     
     private func setupTimerBar() {
+        // Set the game time from options
+        gameTime = OptionsScene.timeLimit
+        timeRemaining = gameTime
+        
         // Create the background bar
         let barHeight: CGFloat = 20
         timerBarWidth = size.width - 40 // 20 points padding on each side
@@ -113,7 +122,12 @@ class GameScene: SKScene {
         
         // Create timer label
         timerLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
-        timerLabel.text = "1:00"
+        
+        // Format the time as minutes:seconds
+        let minutes = Int(timeRemaining) / 60
+        let seconds = Int(timeRemaining) % 60
+        timerLabel.text = String(format: "%d:%02d", minutes, seconds)
+        
         timerLabel.fontSize = 20
         timerLabel.fontColor = SKColor.white
         timerLabel.position = CGPoint(x: size.width/2, y: size.height - 80)
@@ -122,29 +136,33 @@ class GameScene: SKScene {
     }
     
     private func createBoard() {
-        // Initialize the board array with optionals
+        // Initialize the board array with the correct dimensions
         board = Array(repeating: Array(repeating: nil, count: boardWidth), count: boardHeight)
         
-        // Create a pool of numbers that ensures valid combinations
-        var numberPool = generateBalancedNumberPool()
-        
-        // Create cells with values from the balanced pool
+        // Create cells for the board
         for row in 0..<boardHeight {
             for col in 0..<boardWidth {
-                // Get a value from the pool
-                let value = numberPool.removeFirst()
+                // Create a cell with a random value (1-9)
+                let value = Int.random(in: 1...9)
                 let cell = FruitCell(value: value)
                 
-                // Position the cell with minimal spacing
-                let x = boardOriginX + (CGFloat(col) * (cellSize + cellSpacing)) + cellSize/2
-                let y = boardOriginY + (CGFloat(boardHeight - 1 - row) * (cellSize + cellSpacing)) + cellSize/2
+                // Position the cell on the board
+                let x = boardOriginX + CGFloat(col) * (cellSize + cellSpacing) + cellSize/2
+                let y = boardOriginY + CGFloat(row) * (cellSize + cellSpacing) + cellSize/2
                 cell.position = CGPoint(x: x, y: y)
                 
-                // Set the size of the cell and its contents
-                cell.size = CGSize(width: cellSize, height: cellSize)
+                // Update the cell size
                 cell.updateSize(size: cellSize)
                 
+                // Apply the cell color from options
+                cell.setColors(cellColor: OptionsScene.cellColor, fontColor: OptionsScene.fontColor)
+                
+                // Apply the cell shape from options
+                cell.updateShape()
+                
                 addChild(cell)
+                
+                // Store the cell in the board array
                 board[row][col] = cell
             }
         }
@@ -217,24 +235,24 @@ class GameScene: SKScene {
         return numberPool
     }
     
-    private func setupBackButton() {
-        // Back button
-        let backButton = SKShapeNode(rectOf: CGSize(width: 80, height: 40), cornerRadius: 10)
-        backButton.fillColor = SKColor(red: 0.3, green: 0.3, blue: 0.3, alpha: 0.7)
-        backButton.strokeColor = SKColor.black
-        backButton.lineWidth = 1
-        backButton.position = CGPoint(x: 60, y: size.height - 40)
-        backButton.name = "backButton"
+    private func setupMenuButton() {
+        // Menu button
+        menuButton = SKShapeNode(rectOf: CGSize(width: 80, height: 40), cornerRadius: 10)
+        menuButton.fillColor = SKColor(red: 0.3, green: 0.3, blue: 0.3, alpha: 0.7)
+        menuButton.strokeColor = SKColor.black
+        menuButton.lineWidth = 1
+        menuButton.position = CGPoint(x: 60, y: size.height - 40)
+        menuButton.name = "menuButton"
         
-        let backLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
-        backLabel.text = "Back"
-        backLabel.fontSize = 18
-        backLabel.fontColor = SKColor.white
-        backLabel.verticalAlignmentMode = .center
-        backLabel.horizontalAlignmentMode = .center
-        backButton.addChild(backLabel)
+        let menuLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        menuLabel.text = "Menu"
+        menuLabel.fontSize = 18
+        menuLabel.fontColor = SKColor.white
+        menuLabel.verticalAlignmentMode = .center
+        menuLabel.horizontalAlignmentMode = .center
+        menuButton.addChild(menuLabel)
         
-        addChild(backButton)
+        addChild(menuButton)
     }
     
     // Add a hint button to the game
@@ -262,16 +280,20 @@ class GameScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
-        let nodes = self.nodes(at: location)
         
+        // If the game is paused, handle pause menu touches
+        if gamePaused {
+            if let pauseMenu = pauseMenu, pauseMenu.handleTouch(at: location) {
+                return
+            }
+            return
+        }
+        
+        // Check for menu button touch
+        let nodes = self.nodes(at: location)
         for node in nodes {
-            if node.name == "backButton" {
-                // Transition back to start scene
-                let startScene = StartScene(size: self.size)
-                startScene.scaleMode = .aspectFill
-                
-                let transition = SKTransition.fade(withDuration: 0.5)
-                self.view?.presentScene(startScene, transition: transition)
+            if node.name == "menuButton" {
+                showPauseMenu()
                 return
             } else if node.name == "restartButton" {
                 // Restart the game
@@ -288,18 +310,27 @@ class GameScene: SKScene {
             }
         }
         
-        // Continue with normal touch handling for game
-        startPoint = touch.location(in: self)
-        currentPoint = startPoint
+        // Only handle game touches if the game is active and not paused
+        if !isGameActive || gamePaused { return }
         
-        // Create selection box
-        selectionBox = SKShapeNode(rectOf: CGSize.zero)
-        selectionBox?.strokeColor = SKColor.blue.withAlphaComponent(0.5)
-        selectionBox?.lineWidth = 1
-        selectionBox?.fillColor = SKColor.blue.withAlphaComponent(0.1)
-        addChild(selectionBox!)
+        // Handle selection start
+        startPoint = location
+        currentPoint = location
         
-        updateSelectionBox()
+        // Create selection box if it doesn't exist
+        if selectionBox == nil {
+            selectionBox = SKShapeNode(rectOf: CGSize.zero)
+            selectionBox?.strokeColor = SKColor.blue.withAlphaComponent(0.5)
+            selectionBox?.lineWidth = 1
+            selectionBox?.fillColor = SKColor.blue.withAlphaComponent(0.1)
+            addChild(selectionBox!)
+        }
+        
+        // Clear previous selection
+        for cell in selectedCells {
+            cell.unhighlight()
+        }
+        selectedCells.removeAll()
     }
     
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -364,41 +395,50 @@ class GameScene: SKScene {
     }
     
     override func update(_ currentTime: TimeInterval) {
-        // First frame, just set lastUpdateTime
+        // Skip updates when paused
+        if gamePaused { return }
+        
+        // First frame, just set the last update time
         if lastUpdateTime == 0 {
             lastUpdateTime = currentTime
             return
         }
         
+        // Calculate delta time
+        let dt = currentTime - lastUpdateTime
+        lastUpdateTime = currentTime
+        
         // Only update timer if game is active
         if isGameActive {
-            // Calculate delta time
-            let deltaTime = currentTime - lastUpdateTime
-            lastUpdateTime = currentTime
-            
             // Update time remaining
-            timeRemaining -= deltaTime
+            timeRemaining -= dt
+            
+            // Update timer display
+            updateTimerDisplay()
+            
+            // Check if time's up
             if timeRemaining <= 0 {
-                timeRemaining = 0
                 endGameDueToTimeUp()
             }
-            
-            // Update timer bar width
-            let percentage = CGFloat(timeRemaining / gameTime)
-            let newWidth = timerBarWidth * percentage
-            timerBar.path = CGPath(roundedRect: CGRect(x: -newWidth/2, y: -10, width: newWidth, height: 20), cornerWidth: 5, cornerHeight: 5, transform: nil)
-            
-            // Update timer label
-            let minutes = Int(timeRemaining) / 60
-            let seconds = Int(timeRemaining) % 60
-            timerLabel.text = String(format: "%d:%02d", minutes, seconds)
-            
-            // Change color as time gets low
-            if timeRemaining < 10 {
-                timerBar.fillColor = SKColor.red.withAlphaComponent(0.7)
-            } else if timeRemaining < 30 {
-                timerBar.fillColor = SKColor.orange.withAlphaComponent(0.7)
-            }
+        }
+    }
+    
+    private func updateTimerDisplay() {
+        // Update timer bar width
+        let percentage = CGFloat(timeRemaining / gameTime)
+        let newWidth = timerBarWidth * percentage
+        timerBar.path = CGPath(roundedRect: CGRect(x: -newWidth/2, y: -10, width: newWidth, height: 20), cornerWidth: 5, cornerHeight: 5, transform: nil)
+        
+        // Update timer label
+        let minutes = Int(timeRemaining) / 60
+        let seconds = Int(timeRemaining) % 60
+        timerLabel.text = String(format: "%d:%02d", minutes, seconds)
+        
+        // Change color as time gets low
+        if timeRemaining < 10 {
+            timerBar.fillColor = SKColor.red.withAlphaComponent(0.7)
+        } else if timeRemaining < 30 {
+            timerBar.fillColor = SKColor.orange.withAlphaComponent(0.7)
         }
     }
     
@@ -409,8 +449,8 @@ class GameScene: SKScene {
         isGameActive = false
         
         // Create a semi-transparent background panel
-        let panelBackground = SKShapeNode(rectOf: CGSize(width: size.width - 60, height: 240), cornerRadius: 20)
-        panelBackground.fillColor = SKColor.black.withAlphaComponent(0.7)
+        let panelBackground = SKShapeNode(rectOf: CGSize(width: size.width - 60, height: 300), cornerRadius: 20)
+        panelBackground.fillColor = SKColor.black.withAlphaComponent(0.9)
         panelBackground.strokeColor = SKColor.white.withAlphaComponent(0.3)
         panelBackground.lineWidth = 2
         panelBackground.position = CGPoint(x: size.width/2, y: size.height/2)
@@ -421,7 +461,7 @@ class GameScene: SKScene {
         let timeUpLabel = SKLabelNode(fontNamed: "Futura-Bold")
         timeUpLabel.text = "Time's Up!"
         timeUpLabel.fontSize = 48
-        timeUpLabel.fontColor = SKColor.red
+        timeUpLabel.fontColor = SKColor.white
         timeUpLabel.position = CGPoint(x: size.width/2, y: size.height/2 + 50)
         timeUpLabel.zPosition = 11
         addChild(timeUpLabel)
@@ -784,5 +824,57 @@ class GameScene: SKScene {
                 }
             }
         }
+    }
+    
+    // Add this method to show the pause menu
+    private func showPauseMenu() {
+        if gamePaused { return }
+        
+        gamePaused = true
+        
+        // Create and configure the pause menu
+        pauseMenu = PauseMenu()
+        pauseMenu?.position = CGPoint(x: size.width/2, y: size.height/2)
+        pauseMenu?.zPosition = 1000
+        
+        // Set up callbacks
+        pauseMenu?.onResume = { [weak self] in
+            self?.resumeGame()
+        }
+        
+        pauseMenu?.onOptions = { [weak self] in
+            guard let self = self else { return }
+            
+            // Transition to options scene
+            let optionsScene = OptionsScene(size: self.size)
+            optionsScene.scaleMode = .aspectFill
+            
+            let transition = SKTransition.fade(withDuration: 0.5)
+            self.view?.presentScene(optionsScene, transition: transition)
+        }
+        
+        pauseMenu?.onMenu = { [weak self] in
+            guard let self = self else { return }
+            
+            // Transition to start scene
+            let startScene = StartScene(size: self.size)
+            startScene.scaleMode = .aspectFill
+            
+            let transition = SKTransition.fade(withDuration: 0.5)
+            self.view?.presentScene(startScene, transition: transition)
+        }
+        
+        addChild(pauseMenu!)
+    }
+    
+    // Add this method to resume the game
+    private func resumeGame() {
+        if !gamePaused { return }
+        
+        gamePaused = false
+        
+        // Remove the pause menu
+        pauseMenu?.removeFromParent()
+        pauseMenu = nil
     }
 } 
