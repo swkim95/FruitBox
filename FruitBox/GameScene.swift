@@ -11,8 +11,8 @@ import GameplayKit
 class GameScene: SKScene {
     
     // Game board properties
-    private var boardWidth = 8 // Number of columns
-    private var boardHeight = 6 // Number of rows
+    private var boardWidth = 9 // Number of columns
+    private var boardHeight = 18 // Number of rows
     private var cellSize: CGFloat = 0
     private var cellSpacing: CGFloat = 2 // Small spacing between cells
     private var board: [[FruitCell?]] = [] // Changed to optional to allow for nil cells
@@ -309,12 +309,22 @@ class GameScene: SKScene {
         
         isGameActive = false
         
+        // Create a semi-transparent background panel
+        let panelBackground = SKShapeNode(rectOf: CGSize(width: size.width - 60, height: 240), cornerRadius: 20)
+        panelBackground.fillColor = SKColor.black.withAlphaComponent(0.7)
+        panelBackground.strokeColor = SKColor.white.withAlphaComponent(0.3)
+        panelBackground.lineWidth = 2
+        panelBackground.position = CGPoint(x: size.width/2, y: size.height/2)
+        panelBackground.zPosition = 10
+        addChild(panelBackground)
+        
         // Display time up message
         let timeUpLabel = SKLabelNode(fontNamed: "Futura-Bold")
         timeUpLabel.text = "Time's Up!"
         timeUpLabel.fontSize = 48
         timeUpLabel.fontColor = SKColor.red
         timeUpLabel.position = CGPoint(x: size.width/2, y: size.height/2 + 50)
+        timeUpLabel.zPosition = 11
         addChild(timeUpLabel)
         
         // Display final score
@@ -323,6 +333,7 @@ class GameScene: SKScene {
         finalScoreLabel.fontSize = 36
         finalScoreLabel.fontColor = SKColor(red: 0.1, green: 0.6, blue: 0.3, alpha: 1.0)
         finalScoreLabel.position = CGPoint(x: size.width/2, y: size.height/2)
+        finalScoreLabel.zPosition = 11
         addChild(finalScoreLabel)
         
         // Add restart button
@@ -332,6 +343,7 @@ class GameScene: SKScene {
         restartButton.lineWidth = 1
         restartButton.position = CGPoint(x: size.width/2, y: size.height/2 - 60)
         restartButton.name = "restartButton"
+        restartButton.zPosition = 11
         
         let restartLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
         restartLabel.text = "Play Again"
@@ -425,12 +437,22 @@ class GameScene: SKScene {
         
         isGameActive = false
         
+        // Create a semi-transparent background panel
+        let panelBackground = SKShapeNode(rectOf: CGSize(width: size.width - 60, height: 240), cornerRadius: 20)
+        panelBackground.fillColor = SKColor.black.withAlphaComponent(0.7)
+        panelBackground.strokeColor = SKColor.white.withAlphaComponent(0.3)
+        panelBackground.lineWidth = 2
+        panelBackground.position = CGPoint(x: size.width/2, y: size.height/2)
+        panelBackground.zPosition = 10
+        addChild(panelBackground)
+        
         // Display game over message with fancy font
         let gameOverLabel = SKLabelNode(fontNamed: "Futura-Bold")
         gameOverLabel.text = "Game Over!"
         gameOverLabel.fontSize = 48
         gameOverLabel.fontColor = SKColor.red
         gameOverLabel.position = CGPoint(x: size.width/2, y: size.height/2 + 50)
+        gameOverLabel.zPosition = 11
         addChild(gameOverLabel)
         
         // Display final score
@@ -439,6 +461,7 @@ class GameScene: SKScene {
         finalScoreLabel.fontSize = 36
         finalScoreLabel.fontColor = SKColor(red: 0.1, green: 0.6, blue: 0.3, alpha: 1.0)
         finalScoreLabel.position = CGPoint(x: size.width/2, y: size.height/2)
+        finalScoreLabel.zPosition = 11
         addChild(finalScoreLabel)
         
         // Add restart button
@@ -448,6 +471,7 @@ class GameScene: SKScene {
         restartButton.lineWidth = 1
         restartButton.position = CGPoint(x: size.width/2, y: size.height/2 - 60)
         restartButton.name = "restartButton"
+        restartButton.zPosition = 11
         
         let restartLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
         restartLabel.text = "Play Again"
@@ -470,12 +494,22 @@ class GameScene: SKScene {
         let timeBonus = Int(timeRemaining * 10)
         let totalScore = score + timeBonus
         
+        // Create a semi-transparent background panel
+        let panelBackground = SKShapeNode(rectOf: CGSize(width: size.width - 60, height: 320), cornerRadius: 20)
+        panelBackground.fillColor = SKColor.black.withAlphaComponent(0.7)
+        panelBackground.strokeColor = SKColor.white.withAlphaComponent(0.3)
+        panelBackground.lineWidth = 2
+        panelBackground.position = CGPoint(x: size.width/2, y: size.height/2)
+        panelBackground.zPosition = 10
+        addChild(panelBackground)
+        
         // Display win message with fancy font
         let winLabel = SKLabelNode(fontNamed: "Futura-Bold")
         winLabel.text = "You Win!"
         winLabel.fontSize = 48
         winLabel.fontColor = SKColor.green
         winLabel.position = CGPoint(x: size.width/2, y: size.height/2 + 80)
+        winLabel.zPosition = 11
         addChild(winLabel)
         
         // Display score breakdown
@@ -484,6 +518,7 @@ class GameScene: SKScene {
         scoreLabel.fontSize = 28
         scoreLabel.fontColor = SKColor(red: 0.1, green: 0.6, blue: 0.3, alpha: 1.0)
         scoreLabel.position = CGPoint(x: size.width/2, y: size.height/2 + 30)
+        scoreLabel.zPosition = 11
         addChild(scoreLabel)
         
         let bonusLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
@@ -491,6 +526,7 @@ class GameScene: SKScene {
         bonusLabel.fontSize = 28
         bonusLabel.fontColor = SKColor(red: 0.1, green: 0.6, blue: 0.3, alpha: 1.0)
         bonusLabel.position = CGPoint(x: size.width/2, y: size.height/2)
+        bonusLabel.zPosition = 11
         addChild(bonusLabel)
         
         let totalLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
@@ -498,6 +534,7 @@ class GameScene: SKScene {
         totalLabel.fontSize = 32
         totalLabel.fontColor = SKColor(red: 0.1, green: 0.6, blue: 0.3, alpha: 1.0)
         totalLabel.position = CGPoint(x: size.width/2, y: size.height/2 - 30)
+        totalLabel.zPosition = 11
         addChild(totalLabel)
         
         // Add restart button
@@ -507,6 +544,7 @@ class GameScene: SKScene {
         restartButton.lineWidth = 1
         restartButton.position = CGPoint(x: size.width/2, y: size.height/2 - 80)
         restartButton.name = "restartButton"
+        restartButton.zPosition = 11
         
         let restartLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
         restartLabel.text = "Play Again"
