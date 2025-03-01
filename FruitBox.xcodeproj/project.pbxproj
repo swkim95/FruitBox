@@ -12,9 +12,11 @@
 		3CB554B52D73002E0062DB8F /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 3CB554B42D73002E0062DB8F /* Actions.sks */; };
 		3CB554B72D73002E0062DB8F /* GameScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB554B62D73002E0062DB8F /* GameScene.swift */; };
 		3CB554B92D73002E0062DB8F /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB554B82D73002E0062DB8F /* GameViewController.swift */; };
-		3CB554BC2D73002E0062DB8F /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 3CB554BB2D73002E0062DB8F /* Base */; };
-		3CB554BE2D73002F0062DB8F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 3CB554BD2D73002F0062DB8F /* Assets.xcassets */; };
-		3CB554C12D73002F0062DB8F /* Base in Resources */ = {isa = PBXBuildFile; fileRef = 3CB554C02D73002F0062DB8F /* Base */; };
+		3CB554CA2D7301440062DB8F /* FruitCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB554C82D7301440062DB8F /* FruitCell.swift */; };
+		3CB554CC2D7302680062DB8F /* FruitBoxInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3CB554CB2D7302680062DB8F /* FruitBoxInfo.plist */; };
+		3CB554CE2D7304F30062DB8F /* StartScene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB554CD2D7304F30062DB8F /* StartScene.swift */; };
+		3CB554DF2D730C1B0062DB8F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3CB554DD2D730C1B0062DB8F /* Main.storyboard */; };
+		3CB554E02D730C1B0062DB8F /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CB554DE2D730C1B0062DB8F /* SceneDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,9 +26,11 @@
 		3CB554B42D73002E0062DB8F /* Actions.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Actions.sks; sourceTree = "<group>"; };
 		3CB554B62D73002E0062DB8F /* GameScene.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameScene.swift; sourceTree = "<group>"; };
 		3CB554B82D73002E0062DB8F /* GameViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameViewController.swift; sourceTree = "<group>"; };
-		3CB554BB2D73002E0062DB8F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		3CB554BD2D73002F0062DB8F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		3CB554C02D73002F0062DB8F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		3CB554C82D7301440062DB8F /* FruitCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FruitCell.swift; sourceTree = "<group>"; };
+		3CB554CB2D7302680062DB8F /* FruitBoxInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = FruitBoxInfo.plist; sourceTree = "<group>"; };
+		3CB554CD2D7304F30062DB8F /* StartScene.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StartScene.swift; sourceTree = "<group>"; };
+		3CB554DD2D730C1B0062DB8F /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		3CB554DE2D730C1B0062DB8F /* SceneDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,16 +63,26 @@
 		3CB554AF2D73002E0062DB8F /* FruitBox */ = {
 			isa = PBXGroup;
 			children = (
+				3CB554DD2D730C1B0062DB8F /* Main.storyboard */,
+				3CB554DE2D730C1B0062DB8F /* SceneDelegate.swift */,
+				3CB554DC2D730B470062DB8F /* Base.lproj */,
+				3CB554CD2D7304F30062DB8F /* StartScene.swift */,
+				3CB554CB2D7302680062DB8F /* FruitBoxInfo.plist */,
+				3CB554C82D7301440062DB8F /* FruitCell.swift */,
 				3CB554B02D73002E0062DB8F /* AppDelegate.swift */,
 				3CB554B22D73002E0062DB8F /* GameScene.sks */,
 				3CB554B42D73002E0062DB8F /* Actions.sks */,
 				3CB554B62D73002E0062DB8F /* GameScene.swift */,
 				3CB554B82D73002E0062DB8F /* GameViewController.swift */,
-				3CB554BA2D73002E0062DB8F /* Main.storyboard */,
-				3CB554BD2D73002F0062DB8F /* Assets.xcassets */,
-				3CB554BF2D73002F0062DB8F /* LaunchScreen.storyboard */,
 			);
 			path = FruitBox;
+			sourceTree = "<group>";
+		};
+		3CB554DC2D730B470062DB8F /* Base.lproj */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Base.lproj;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -130,10 +144,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				3CB554B32D73002E0062DB8F /* GameScene.sks in Resources */,
-				3CB554BC2D73002E0062DB8F /* Base in Resources */,
-				3CB554BE2D73002F0062DB8F /* Assets.xcassets in Resources */,
+				3CB554CC2D7302680062DB8F /* FruitBoxInfo.plist in Resources */,
 				3CB554B52D73002E0062DB8F /* Actions.sks in Resources */,
-				3CB554C12D73002F0062DB8F /* Base in Resources */,
+				3CB554DF2D730C1B0062DB8F /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -144,32 +157,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3CB554CA2D7301440062DB8F /* FruitCell.swift in Sources */,
 				3CB554B72D73002E0062DB8F /* GameScene.swift in Sources */,
 				3CB554B92D73002E0062DB8F /* GameViewController.swift in Sources */,
+				3CB554CE2D7304F30062DB8F /* StartScene.swift in Sources */,
 				3CB554B12D73002E0062DB8F /* AppDelegate.swift in Sources */,
+				3CB554E02D730C1B0062DB8F /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXVariantGroup section */
-		3CB554BA2D73002E0062DB8F /* Main.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				3CB554BB2D73002E0062DB8F /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		3CB554BF2D73002F0062DB8F /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				3CB554C02D73002F0062DB8F /* Base */,
-			);
-			name = LaunchScreen.storyboard;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		3CB554C22D73002F0062DB8F /* Debug */ = {
@@ -300,6 +297,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L7A34HWAF4;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = FruitBox;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.puzzle-games";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -328,6 +327,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = L7A34HWAF4;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = FruitBox;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.puzzle-games";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
