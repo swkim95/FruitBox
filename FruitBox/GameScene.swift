@@ -906,9 +906,9 @@ class GameScene: SKScene {
             }
         }
         
-        // Shuffle the array and pick the first 10 cells (or fewer if there aren't enough cells)
+        // Shuffle the array and pick the first N cells (or fewer if there aren't enough cells)
         allCells.shuffle()
-        let bonusCount = min(10, allCells.count)
+        let bonusCount = min(OptionsScene.bonusCatCount, allCells.count)
         
         for i in 0..<bonusCount {
             allCells[i].isTimeBonus = true

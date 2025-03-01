@@ -53,6 +53,8 @@ class OptionsScene: SKScene {
     private var brightnessSlider: SKShapeNode!
     private var brightnessSliderKnob: SKShapeNode!
     private var isDraggingBrightnessSlider = false
+    private var isDraggingBonusCatCountSlider = false
+    private var isDraggingBonusCatTimeSlider = false
     private var currentBrightness: CGFloat = 1.0  // Default to full brightness
     
     // State tracking
@@ -69,7 +71,7 @@ class OptionsScene: SKScene {
     
     // Add these properties to the OptionsScene class
     private var currentPage = 0
-    private let totalPages = 2
+    private let totalPages = 3
     private var pageIndicators: [SKShapeNode] = []
     private var pageContainers: [SKNode] = []
     private var lastTouchLocation: CGPoint?
@@ -80,6 +82,18 @@ class OptionsScene: SKScene {
     
     // Add this static property to the OptionsScene class
     private static var cachedCatImage: UIImage?
+    
+    // Add these static properties to the OptionsScene class
+    static var bonusCatCount: Int = 10 // Default: 10 bonus cats
+    static var bonusCatTimeBonus: TimeInterval = 10.0 // Default: 10 seconds
+    
+    // Add these properties for the UI controls
+    private var bonusCatCountSlider: SKShapeNode!
+    private var bonusCatCountSliderKnob: SKShapeNode!
+    private var bonusCatCountLabel: SKLabelNode!
+    private var bonusCatTimeSlider: SKShapeNode!
+    private var bonusCatTimeSliderKnob: SKShapeNode!
+    private var bonusCatTimeLabel: SKLabelNode!
     
     override func didMove(to view: SKView) {
         // Set background color
@@ -95,11 +109,14 @@ class OptionsScene: SKScene {
         // Setup page navigation
         setupPageNavigation()
         
-        // Setup page 1 content (Colors and Time)
+        // Setup page 0 content (Colors and Time)
         setupColorAndTimePage()
         
-        // Setup page 2 content (Cell Shape)
+        // Setup page 1 content (Cell Shape)
         setupCellShapePage()
+        
+        // Setup page 2 content (Bonus Cat)
+        setupBonusCatPage()
         
         // Show the first page by default
         showPage(0)
@@ -345,6 +362,16 @@ class OptionsScene: SKScene {
                 updateBrightnessSlider(at: location)
                 return
             }
+            else if node.name == "page2_countSliderKnob" || node.name == "page2_countSlider" {
+                isDraggingBonusCatCountSlider = true
+                updateBonusCatCountSlider(at: location)
+                return
+            }
+            else if node.name == "page2_timeSliderKnob" || node.name == "page2_timeSlider" {
+                isDraggingBonusCatTimeSlider = true
+                updateBonusCatTimeSlider(at: location)
+                return
+            }
             else if node.name == "bgColorButton" || node.name == "page0_bgColorButton" {
                 selectedColorType = .background
                 updateColorTypeSelection()
@@ -415,7 +442,14 @@ class OptionsScene: SKScene {
             updateBrightnessSlider(at: currentLocation)
             return
         }
-        
+        else if isDraggingBonusCatCountSlider {
+            updateBonusCatCountSlider(at: currentLocation)
+            return
+        }
+        else if isDraggingBonusCatTimeSlider {
+            updateBonusCatTimeSlider(at: currentLocation)
+            return
+        }
         // Only check for horizontal swipe if we're not interacting with other UI elements
         let horizontalDelta = currentLocation.x - startLocation.x
         let verticalDelta = abs(currentLocation.y - startLocation.y)
@@ -430,6 +464,21 @@ class OptionsScene: SKScene {
                 container.position.x = baseX + horizontalDelta
             }
         }
+        
+        // Add these cases to handle the bonus cat sliders
+        let touchedNode = atPoint(currentLocation)
+        
+        // Handle bonus cat count slider dragging
+        if touchedNode.name?.hasPrefix("page2_countSliderKnob") == true {
+            updateBonusCatCountSlider(at: currentLocation)
+            return
+        }
+        
+        // Handle bonus cat time slider dragging
+        if touchedNode.name?.hasPrefix("page2_timeSliderKnob") == true {
+            updateBonusCatTimeSlider(at: currentLocation)
+            return
+        }
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -439,7 +488,7 @@ class OptionsScene: SKScene {
         }
         
         // If we were interacting with a specific UI element, just reset states
-        if isDraggingColorWheel || isDraggingSlider || isDraggingBrightnessSlider {
+        if isDraggingColorWheel || isDraggingSlider || isDraggingBrightnessSlider || isDraggingBonusCatCountSlider || isDraggingBonusCatTimeSlider {
             resetTouchStates()
             return
         }
@@ -471,6 +520,8 @@ class OptionsScene: SKScene {
         isDraggingColorWheel = false
         isDraggingSlider = false
         isDraggingBrightnessSlider = false
+        isDraggingBonusCatCountSlider = false
+        isDraggingBonusCatTimeSlider = false
         lastTouchLocation = nil
         isSwipingPage = false
     }
@@ -708,14 +759,14 @@ class OptionsScene: SKScene {
             
             // Add a number to the preview
             let numberLabel = SKLabelNode(fontNamed: "Futura-Bold")
-            numberLabel.text = "4"
+            numberLabel.text = "7"
             numberLabel.fontSize = previewSize.width * 0.5
             numberLabel.fontColor = OptionsScene.fontColor
             numberLabel.verticalAlignmentMode = .center
             numberLabel.horizontalAlignmentMode = .center
             numberLabel.position = previewBackground.position
             numberLabel.name = "page1_preview_number"
-            shapePreview.addChild(numberLabel)
+            pageContainers[1].addChild(numberLabel)
             
         case .circle:
             let shapePreview = SKShapeNode(circleOfRadius: previewSize.width / 2)
@@ -728,14 +779,14 @@ class OptionsScene: SKScene {
             
             // Add a number to the preview
             let numberLabel = SKLabelNode(fontNamed: "Futura-Bold")
-            numberLabel.text = "4"
+            numberLabel.text = "5"
             numberLabel.fontSize = previewSize.width * 0.5
             numberLabel.fontColor = OptionsScene.fontColor
             numberLabel.verticalAlignmentMode = .center
             numberLabel.horizontalAlignmentMode = .center
             numberLabel.position = previewBackground.position
             numberLabel.name = "page1_preview_number"
-            shapePreview.addChild(numberLabel)
+            pageContainers[1].addChild(numberLabel)
             
         case .cat:
             // Create a cat-shaped preview
@@ -746,7 +797,7 @@ class OptionsScene: SKScene {
             
             // Add a number to the preview
             let numberLabel = SKLabelNode(fontNamed: "Futura-Bold")
-            numberLabel.text = "4"
+            numberLabel.text = "3"
             numberLabel.fontSize = previewSize.width * 0.5
             numberLabel.fontColor = OptionsScene.fontColor
             numberLabel.verticalAlignmentMode = .center
@@ -1158,5 +1209,178 @@ class OptionsScene: SKScene {
         let minutes = Int(newTime) / 60
         let seconds = Int(newTime) % 60
         timeLabel.text = String(format: "%d:%02d", minutes, seconds)
+    }
+    
+    // Add this method to setup the bonus cat page
+    private func setupBonusCatPage() {
+
+        guard pageContainers.count > 2 else { return }
+        let container = pageContainers[2]
+        
+        // Page title - centered at the top
+        let titleLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        titleLabel.text = "Bonus Cat Settings"
+        titleLabel.fontSize = 28
+        titleLabel.fontColor = SKColor.black
+        titleLabel.position = CGPoint(x: size.width/2, y: size.height - 120)
+        titleLabel.horizontalAlignmentMode = .center
+        titleLabel.name = "page2_title"
+        container.addChild(titleLabel)
+        
+        // Bonus Cat Count Subsection - centered
+        let countLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        countLabel.text = "Number of Bonus Cats"
+        countLabel.fontSize = 24
+        countLabel.fontColor = SKColor.black
+        countLabel.position = CGPoint(x: size.width/2, y: size.height - 200)
+        countLabel.horizontalAlignmentMode = .center
+        countLabel.name = "page2_countLabel"
+        container.addChild(countLabel)
+        
+        // Bonus Cat Count Slider - centered
+        bonusCatCountSlider = SKShapeNode(rectOf: CGSize(width: 280, height: 10), cornerRadius: 5)
+        bonusCatCountSlider.fillColor = SKColor.lightGray.withAlphaComponent(0.5)
+        bonusCatCountSlider.strokeColor = SKColor.black
+        bonusCatCountSlider.lineWidth = 1
+        bonusCatCountSlider.position = CGPoint(x: size.width/2, y: size.height - 250)
+        bonusCatCountSlider.name = "page2_countSlider"
+        container.addChild(bonusCatCountSlider)
+        
+        // Bonus Cat Count Slider Knob
+        bonusCatCountSliderKnob = SKShapeNode(circleOfRadius: 15)
+        bonusCatCountSliderKnob.fillColor = SKColor.white
+        bonusCatCountSliderKnob.strokeColor = SKColor.black
+        bonusCatCountSliderKnob.lineWidth = 1
+        
+        // Calculate initial position based on current count
+        let minCount: CGFloat = 5
+        let maxCount: CGFloat = 70
+        let countSliderWidth = bonusCatCountSlider.frame.width - 30 // Adjust for knob size
+        let normalizedCount = CGFloat(OptionsScene.bonusCatCount - Int(minCount)) / (maxCount - minCount)
+        let countInitialX = bonusCatCountSlider.position.x - countSliderWidth/2 + normalizedCount * countSliderWidth
+        
+        bonusCatCountSliderKnob.position = CGPoint(x: countInitialX, y: bonusCatCountSlider.position.y)
+        bonusCatCountSliderKnob.name = "page2_countSliderKnob"
+        container.addChild(bonusCatCountSliderKnob)
+        
+        // Bonus Cat Count Label - centered
+        bonusCatCountLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        bonusCatCountLabel.text = "\(OptionsScene.bonusCatCount) cats"
+        bonusCatCountLabel.fontSize = 20
+        bonusCatCountLabel.fontColor = SKColor.black
+        bonusCatCountLabel.position = CGPoint(x: size.width/2, y: size.height - 290)
+        bonusCatCountLabel.horizontalAlignmentMode = .center
+        bonusCatCountLabel.name = "page2_countValueLabel"
+        container.addChild(bonusCatCountLabel)
+        
+        // Bonus Cat Time Subsection - centered
+        let timeLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        timeLabel.text = "Time Bonus per Cat"
+        timeLabel.fontSize = 24
+        timeLabel.fontColor = SKColor.black
+        timeLabel.position = CGPoint(x: size.width/2, y: size.height - 350)
+        timeLabel.horizontalAlignmentMode = .center
+        timeLabel.name = "page2_timeLabel"
+        container.addChild(timeLabel)
+        
+        // Bonus Cat Time Slider - centered
+        bonusCatTimeSlider = SKShapeNode(rectOf: CGSize(width: 280, height: 10), cornerRadius: 5)
+        bonusCatTimeSlider.fillColor = SKColor.lightGray.withAlphaComponent(0.5)
+        bonusCatTimeSlider.strokeColor = SKColor.black
+        bonusCatTimeSlider.lineWidth = 1
+        bonusCatTimeSlider.position = CGPoint(x: size.width/2, y: size.height - 400)
+        bonusCatTimeSlider.name = "page2_timeSlider"
+        container.addChild(bonusCatTimeSlider)
+        
+        // Bonus Cat Time Slider Knob
+        bonusCatTimeSliderKnob = SKShapeNode(circleOfRadius: 15)
+        bonusCatTimeSliderKnob.fillColor = SKColor.white
+        bonusCatTimeSliderKnob.strokeColor = SKColor.black
+        bonusCatTimeSliderKnob.lineWidth = 1
+        
+        // Calculate initial position based on current time bonus
+        let minTime: CGFloat = 1
+        let maxTime: CGFloat = 60
+        let timeSliderWidth = bonusCatTimeSlider.frame.width - 30 // Adjust for knob size
+        let normalizedTime = CGFloat(OptionsScene.bonusCatTimeBonus - minTime) / (maxTime - minTime)
+        let timeInitialX = bonusCatTimeSlider.position.x - timeSliderWidth/2 + normalizedTime * timeSliderWidth
+        
+        bonusCatTimeSliderKnob.position = CGPoint(x: timeInitialX, y: bonusCatTimeSlider.position.y)
+        bonusCatTimeSliderKnob.name = "page2_timeSliderKnob"
+        container.addChild(bonusCatTimeSliderKnob)
+        
+        // Bonus Cat Time Label - centered
+        bonusCatTimeLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        bonusCatTimeLabel.text = "+\(Int(OptionsScene.bonusCatTimeBonus)) seconds"
+        bonusCatTimeLabel.fontSize = 20
+        bonusCatTimeLabel.fontColor = SKColor.black
+        bonusCatTimeLabel.position = CGPoint(x: size.width/2, y: size.height - 440)
+        bonusCatTimeLabel.horizontalAlignmentMode = .center
+        bonusCatTimeLabel.name = "page2_timeValueLabel"
+        container.addChild(bonusCatTimeLabel)
+        
+        // Add a preview of the bonus cat - centered
+        let bonusCatPreview = SKSpriteNode(imageNamed: "bonus_cat")
+        bonusCatPreview.size = CGSize(width: 100, height: 100)
+        bonusCatPreview.position = CGPoint(x: size.width/2, y: size.height - 550)
+        bonusCatPreview.name = "page2_bonusCatPreview"
+        container.addChild(bonusCatPreview)
+        
+        // Add a description - centered with proper width
+        let descriptionLabel = SKLabelNode(fontNamed: "AvenirNext-Bold")
+        descriptionLabel.text = "Collect bonus cats to add time to the clock!"
+        descriptionLabel.fontSize = 18
+        descriptionLabel.fontColor = SKColor.black
+        descriptionLabel.position = CGPoint(x: size.width/2, y: size.height - 620)
+        descriptionLabel.horizontalAlignmentMode = .center
+        descriptionLabel.name = "page2_description"
+        container.addChild(descriptionLabel)
+    }
+    
+    // Add these methods to handle the bonus cat sliders
+    private func updateBonusCatCountSlider(at location: CGPoint) {
+        // Calculate slider bounds
+        let sliderWidth = bonusCatCountSlider.frame.width - 30 // Adjust for knob size
+        let sliderLeft = bonusCatCountSlider.position.x - sliderWidth/2
+        let sliderRight = bonusCatCountSlider.position.x + sliderWidth/2
+        
+        // Constrain x position to slider bounds
+        let newX = max(sliderLeft, min(sliderRight, location.x))
+        bonusCatCountSliderKnob.position = CGPoint(x: newX, y: bonusCatCountSlider.position.y)
+        
+        // Calculate count value based on slider position
+        let minCount: Int = 5
+        let maxCount: Int = 70
+        let normalizedPosition = (newX - sliderLeft) / sliderWidth
+        let newCount = minCount + Int(round(CGFloat(maxCount - minCount) * normalizedPosition))
+        
+        // Update the count
+        OptionsScene.bonusCatCount = newCount
+        
+        // Update the label
+        bonusCatCountLabel.text = "\(newCount) cats"
+    }
+    
+    private func updateBonusCatTimeSlider(at location: CGPoint) {
+        // Calculate slider bounds
+        let sliderWidth = bonusCatTimeSlider.frame.width - 30 // Adjust for knob size
+        let sliderLeft = bonusCatTimeSlider.position.x - sliderWidth/2
+        let sliderRight = bonusCatTimeSlider.position.x + sliderWidth/2
+        
+        // Constrain x position to slider bounds
+        let newX = max(sliderLeft, min(sliderRight, location.x))
+        bonusCatTimeSliderKnob.position = CGPoint(x: newX, y: bonusCatTimeSlider.position.y)
+        
+        // Calculate time value based on slider position
+        let minTime: Int = 1
+        let maxTime: Int = 60
+        let normalizedPosition = (newX - sliderLeft) / sliderWidth
+        let newTime = minTime + Int(round(CGFloat(maxTime - minTime) * normalizedPosition))
+        
+        // Update the time bonus
+        OptionsScene.bonusCatTimeBonus = TimeInterval(newTime)
+        
+        // Update the label
+        bonusCatTimeLabel.text = "+\(newTime) seconds"
     }
 }

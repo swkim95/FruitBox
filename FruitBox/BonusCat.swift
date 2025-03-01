@@ -3,7 +3,9 @@ import SpriteKit
 class BonusCat: SKSpriteNode {
     
     // Time bonus amount in seconds
-    static let bonusTime: TimeInterval = 10.0
+    static var bonusTime: TimeInterval {
+        return OptionsScene.bonusCatTimeBonus
+    }
     
     // Callback for when the bonus is collected
     var onCollect: (() -> Void)?
@@ -46,9 +48,9 @@ class BonusCat: SKSpriteNode {
         let sequence = SKAction.sequence([scaleUp, fadeOut, remove])
         self.run(sequence)
         
-        // Add a "+10s" text that floats up
+        // Add a "+Xs" text that floats up (where X is the actual bonus amount)
         let bonusText = SKLabelNode(fontNamed: "AvenirNext-Bold")
-        bonusText.text = "+10s"
+        bonusText.text = "+\(Int(OptionsScene.bonusCatTimeBonus))s"
         bonusText.fontSize = 24
         bonusText.fontColor = SKColor.green
         bonusText.position = CGPoint(x: 0, y: 0)
